@@ -5,6 +5,8 @@ struct TaskListView: View {
     @State private var showingAddTaskView = false
     @State private var selectedTask: Task?
     @State private var showingTaskDetailsView = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
     var body: some View {
         NavigationView {
@@ -42,13 +44,25 @@ struct TaskListView: View {
                 AddTaskView(tasks: $tasks)
             }
             .sheet(item: $selectedTask) { task in
-                TaskDetailsView(task: binding(for: task))
+                TaskDetailsView(task: binding(for: task), onDelete: {
+                    if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                        deleteTask(at: IndexSet(integer: index))
+                    }
+                })
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Task Deleted"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
             }
         }
     }
 
     private func deleteTask(at offsets: IndexSet) {
-        tasks.remove(atOffsets: offsets)
+        offsets.forEach { index in
+            let task = tasks[index]
+            tasks.remove(at: index)
+            alertMessage = "The task \"\(task.title)\" has been deleted."
+            showAlert = true
+        }
     }
 
     private func binding(for task: Task) -> Binding<Task> {

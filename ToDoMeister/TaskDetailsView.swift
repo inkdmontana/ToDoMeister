@@ -4,6 +4,7 @@ struct TaskDetailsView: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var task: Task
     @State private var showingEditTaskView = false
+    var onDelete: () -> Void
 
     var body: some View {
         NavigationView {
@@ -19,7 +20,10 @@ struct TaskDetailsView: View {
                     showingEditTaskView.toggle()
                 }
                 .sheet(isPresented: $showingEditTaskView) {
-                    EditTaskView(task: $task, onDelete: {})
+                    EditTaskView(task: $task, onDelete: {
+                        onDelete()
+                        presentationMode.wrappedValue.dismiss()
+                    })
                 }
             }
             .navigationTitle("Task Details")
@@ -38,6 +42,6 @@ struct TaskDetailsView: View {
 
 struct TaskDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        TaskDetailsView(task: .constant(Task(title: "Sample Task", description: "Sample Description", dueDate: Date(), priority: "Medium", isComplete: false)))
+        TaskDetailsView(task: .constant(Task(title: "Sample Task", description: "Sample Description", dueDate: Date(), priority: "Medium", isComplete: false)), onDelete: {})
     }
 }
